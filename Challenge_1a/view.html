@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>📄 PDF TOC Viewer</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+    #uploadBox { border: 2px dashed #aaa; padding: 20px; text-align: center; background: #fff; }
+    .toc { margin-left: 20px; }
+    .H1 { font-weight: bold; font-size: 20px; }
+    .H2 { margin-left: 20px; font-size: 18px; }
+    .H3 { margin-left: 40px; font-size: 16px; color: #555; }
+  </style>
+</head>
+<body>
+
+<h2>📚 PDF Table of Contents Viewer</h2>
+
+<div id="uploadBox">
+  <input type="file" id="fileInput" accept=".json" />
+</div>
+
+<br>
+
+<label>Filter by Language:</label>
+<select id="languageFilter">
+  <option value="all">Show All</option>
+</select>
+
+<div id="output"></div>
+
+<script>
+  const fileInput = document.getElementById("fileInput");
+  const output = document.getElementById("output");
+  const langFilter = document.getElementById("languageFilter");
+  let tocData = [];
+
+  fileInput.onchange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const json = JSON.parse(event.target.result);
+      tocData = json.outline;
+      populateLanguages(tocData);
+      renderTOC(tocData, langFilter.value);
+    };
+    reader.readAsText(file);
+  };
+
+  langFilter.onchange = () => {
+    renderTOC(tocData, langFilter.value);
+  };
+
+  function populateLanguages(data) {
+    const langs = new Set();
+    (function traverse(items) {
+      for (const item of items) {
+        langs.add(item.lang_name);
+        if (item.subsections) traverse(item.subsections);
+      }
+    })(data);
+
+    langFilter.innerHTML = '<option value="all">Show All</option>';
+    langs.forEach(lang => {
+      const opt = document.createElement("option");
+      opt.value = lang;
+      opt.textContent = lang;
+      langFilter.appendChild(opt);
+    });
+  }
+
+  function renderTOC(data, filter) {
+    output.innerHTML = "";
+    (function traverse(items, container) {
+      for (const item of items) {
+        if (filter !== "all" && item.lang_name !== filter) continue;
+
+        const div = document.createElement("div");
+        div.className = item.level;
+        div.textContent = `${item.text} (${item.lang_name})`;
+        container.appendChild(div);
+
+        if (item.subsections && item.subsections.length > 0) {
+          traverse(item.subsections, container);
+        }
+      }
+    })(data, output);
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+PyMuPDF==1.23.16
+sentence-transformers==2.2.2
+torch
+langdetect
+langcodes
+
