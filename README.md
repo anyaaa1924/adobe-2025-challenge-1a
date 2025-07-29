@@ -76,3 +76,5 @@ Other features like font, page number, heading, subheading and other details wil
 
 #You can activate venv environment too on the system using python -m venv venv
 then activating it.
+
+Important:  The output/ folder is required for saving results. If not present please create an output/ folder in the project root manually. 
